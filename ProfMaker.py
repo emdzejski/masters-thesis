@@ -1,12 +1,18 @@
 import numpy as np 
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 n_voxels = [160,160, 200]
 #range on y i want to take
 l_y = 0
 r_y = 160
 
-vol = np.fromfile("/home/jpet/ccb_dane/offbeam_plexa/plexi_recoim_noAtt/no_plexi_recoim_noAtt_it5.img", dtype=np.float32)
+f_path = "/home/jpet/ccb_dane/offbeam_no_plexa/no_plexi_recoim_noAtt/no_plexi_recoim_noAtt_it5.img"
+
+f_name = Path(f_path).stem
+
+
+vol = np.fromfile(f_path, dtype=np.float32)
 
 vol = np.reshape(vol, n_voxels, order='F')
 
@@ -31,7 +37,7 @@ max_norm_intens = norm_intens[max_idx:]
 
 #print(max_norm_intens)
 slices = np.arange(l_y, r_y,1)
-slices = slices[max_idx:]
+max_slices = slices[max_idx:]
 #slices = np.arange(norm_intens[max_idx],r_y, 1)
 # #slices = np.arange(0,r_y-l_y,1)*2.5
 # #activity = np.zeros(160)
@@ -46,8 +52,9 @@ slices = slices[max_idx:]
 
 plt.figure(figsize=(8, 5))
 #plt.plot(slices, intens, marker='o', linestyle='-', color='b', markersize=4)
-plt.step(slices, max_norm_intens,  color='black')
-plt.title("Sum of Pixel Intensities in XZ Plane vs. Y slice no.")
+plt.step(slices, norm_intens,  color='black')
+#plt.title("Sum of Pixel Intensities in XZ Plane vs. Y slice no.")
+plt.title(f" Emission profile of {f_name}")
 plt.xlabel("slice no.")
 #plt.xlabel("range [mm]")
 plt.ylabel("Total Intensity (a.u.)")
