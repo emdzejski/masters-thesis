@@ -4,7 +4,7 @@ from pathlib import Path
 
 n_voxels = [160,160, 200]
 #range on y i want to take
-l_y = 0
+l_y = 45
 r_y = 160
 
 f_path = "/home/jpet/ccb_dane/offbeam_no_plexa/no_plexi_recoim_noAtt/no_plexi_recoim_noAtt_it5.img"
@@ -15,17 +15,18 @@ f_name = Path(f_path).stem
 vol = np.fromfile(f_path, dtype=np.float32)
 
 vol = np.reshape(vol, n_voxels, order='F')
+vol_y_flipped = np.flip(vol,1)
 
-vol_fov = vol[60:100, l_y:r_y, 75:125]
+vol_fov = vol_y_flipped[60:100, l_y:r_y, 75:125]
 
 #flipping the y axis to match the direction of the beam
-vol_y_flipped = np.flip(vol_fov,1)
+#vol_y_flipped = np.flip(vol_fov,1)
 
 im_slice = vol[:,:,100]
 
 #y_prof = np.sum(im_slice,axis = 0)
 
-intens = np.sum(vol_y_flipped, axis = (0,2))
+intens = np.sum(vol_fov, axis = (0,2))
 max_intens = np.max(intens)
 norm_intens = intens/max_intens
 
@@ -36,7 +37,8 @@ max_idx, = np.where(norm_intens == 1)[0]
 max_norm_intens = norm_intens[max_idx:]
 
 #print(max_norm_intens)
-slices = np.arange(l_y, r_y,1)
+#slices = np.arange(160 - r_y, 160 - l_y, 1)
+slices = np.arange(l_y, r_y,1) * 2.5 #[converting to mm]
 max_slices = slices[max_idx:]
 #slices = np.arange(norm_intens[max_idx],r_y, 1)
 # #slices = np.arange(0,r_y-l_y,1)*2.5
@@ -55,11 +57,11 @@ plt.figure(figsize=(8, 5))
 plt.step(slices, norm_intens,  color='black')
 #plt.title("Sum of Pixel Intensities in XZ Plane vs. Y slice no.")
 plt.title(f" Emission profile of {f_name}")
-plt.xlabel("slice no.")
+plt.xlabel("y-axis slice * 2.5 [mm]") #voxel no. * voxel size=2.5 mm
 #plt.xlabel("range [mm]")
 plt.ylabel("Total Intensity (a.u.)")
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.tight_layout()
-plt.savefig(f"/home/jpet/ccb_dane/graphs/em_profs/em_prof_{f_name}.png", dpi=300)
-#plt.show()
+plt.savefig(f"/home/jpet/ccb_dane/graphs/em_profs/em_prof_{f_name}_zoom.png", dpi=300)
+plt.show()
 plt.close()
